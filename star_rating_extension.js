@@ -2,7 +2,7 @@ export const FeedbackExtension = {
   name: 'Feedback',
   type: 'response',
   match: ({ trace }) =>
-    trace.type === 'ext_feedback' || trace.payload?.name === 'ext_feedback',
+    trace.type === 'star_feedback' || trace.payload?.name === 'star_feedback',
   render: ({ trace, element }) => {
     // SVG for star icon
     const SVG_Star = `
