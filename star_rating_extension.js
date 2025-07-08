@@ -6,7 +6,7 @@ const StarFeedbackExtension = {
   render: ({ trace, element }) => {
     // SVG for star icon
     const SVG_Star = `
-      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
       </svg>
     `
@@ -20,36 +20,45 @@ const StarFeedbackExtension = {
                 justify-content: space-between;
             }
             .vfrc-feedback--description {
-                font-size: 0.8em;
-                color: grey;
+                font-size: 14px;
+                color: #1a1e23;
                 pointer-events: none;
+                font-family: 'UCity Pro', sans-serif;
             }
             .vfrc-feedback--buttons {
                 display: flex;
             }
             .vfrc-feedback--button {
                 margin: 0;
-                padding: 0;
+                padding: 4px;
                 margin-left: 2px;
                 border: none;
                 background: none;
-                opacity: 0.2;
+                opacity: 1;
+                cursor: pointer;
             }
             .vfrc-feedback--button:hover {
-              opacity: 0.5;
+              opacity: 1;
             }
             .vfrc-feedback--button.hovered {
-              opacity: 0.7;
+              opacity: 1;
             }
             .vfrc-feedback--button.selected {
-              opacity: 0.6;
+              opacity: 1;
             }
             .vfrc-feedback--button.disabled {
                 pointer-events: none;
             }
             .vfrc-feedback--button svg {
+                fill: none;
+                stroke: #000;
+                stroke-width: 1;
+            }
+            .vfrc-feedback--button.hovered svg {
                 fill: #ffd700;
-                stroke: none;
+            }
+            .vfrc-feedback--button.selected svg {
+                fill: #ffd700;
             }
           </style>
           <div class="vfrc-feedback">
@@ -81,16 +90,19 @@ const StarFeedbackExtension = {
         
         button.addEventListener('click', function (event) {
           const feedback = this.getAttribute('data-feedback')
+          const selectedIndex = parseInt(feedback) - 1
+          
           window.voiceflow.chat.interact({
             type: 'complete',
             payload: { feedback: feedback },
           })
+          
           feedbackContainer
             .querySelectorAll('.vfrc-feedback--button')
-            .forEach((btn) => {
+            .forEach((btn, index) => {
               btn.classList.add('disabled')
               btn.classList.remove('hovered') // Clear hover state
-              if (btn === this) {
+              if (index <= selectedIndex) {
                 btn.classList.add('selected')
               }
             })
