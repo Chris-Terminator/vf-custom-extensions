@@ -629,7 +629,7 @@ export const FeedbackExtension = {
 
     element.appendChild(feedbackContainer)
 
-   export const StarFeedbackExtension = {
+export const StarFeedbackExtension = {
   name: 'Feedback',
   type: 'response',
   match: ({ trace }) =>
