@@ -628,5 +628,420 @@ export const FeedbackExtension = {
       })
 
     element.appendChild(feedbackContainer)
+
+   export const StarFeedbackExtension = {
+  name: 'Feedback',
+  type: 'response',
+  match: ({ trace }) =>
+    trace.type === 'star_feedback' || trace.payload?.name === 'star_feedback',
+  render: ({ trace, element }) => {
+    // SVG for star icon
+    const SVG_Star = `
+      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+    `
+    
+    const feedbackContainer = document.createElement('div')
+    feedbackContainer.innerHTML = `
+          <style>
+            .vfrc-feedback {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .vfrc-feedback--description {
+                font-size: 0.8em;
+                color: #1a1e23;
+                pointer-events: none;
+                font-family: 'UCity Pro', sans-serif;
+            }
+            .vfrc-feedback--buttons {
+                display: flex;
+            }
+            .vfrc-feedback--button {
+                margin: 0;
+                padding: 4px;
+                margin-left: 2px;
+                border: none;
+                background: none;
+                opacity: 1;
+                cursor: pointer;
+            }
+            .vfrc-feedback--button:hover {
+              opacity: 1;
+            }
+            .vfrc-feedback--button.hovered {
+              opacity: 1;
+            }
+            .vfrc-feedback--button.selected {
+              opacity: 1;
+            }
+            .vfrc-feedback--button.disabled {
+                pointer-events: none;
+            }
+            .vfrc-feedback--button svg {
+                fill: none;
+                stroke: #000;
+                stroke-width: 1;
+            }
+            .vfrc-feedback--button.hovered svg {
+                fill: #ffd700;
+            }
+            .vfrc-feedback--button.selected svg {
+                fill: #ffd700;
+            }
+          </style>
+          <div class="vfrc-feedback">
+            <div class="vfrc-feedback--buttons">
+              <button class="vfrc-feedback--button" data-feedback="1">${SVG_Star}</button>
+              <button class="vfrc-feedback--button" data-feedback="2">${SVG_Star}</button>
+              <button class="vfrc-feedback--button" data-feedback="3">${SVG_Star}</button>
+              <button class="vfrc-feedback--button" data-feedback="4">${SVG_Star}</button>
+              <button class="vfrc-feedback--button" data-feedback="5">${SVG_Star}</button>
+            </div>
+          </div>
+        `
+    feedbackContainer
+      .querySelectorAll('.vfrc-feedback--button')
+      .forEach((button, index) => {
+        // Add hover effects for interactive star highlighting
+        button.addEventListener('mouseenter', function() {
+          if (!this.classList.contains('disabled')) {
+            highlightStars(index + 1)
+          }
+        })
+        
+        button.addEventListener('mouseleave', function() {
+          if (!this.classList.contains('disabled')) {
+            clearHoverHighlight()
+          }
+        })
+        
+        button.addEventListener('click', function (event) {
+          const feedback = this.getAttribute('data-feedback')
+          const selectedIndex = parseInt(feedback) - 1
+          
+          window.voiceflow.chat.interact({
+            type: 'complete',
+            payload: { feedback: feedback },
+          })
+          
+          feedbackContainer
+            .querySelectorAll('.vfrc-feedback--button')
+            .forEach((btn, index) => {
+              btn.classList.add('disabled')
+              btn.classList.remove('hovered') // Clear hover state
+              if (index <= selectedIndex) {
+                btn.classList.add('selected')
+              }
+            })
+        })
+      })
+    
+    // Helper functions for interactive highlighting
+    function highlightStars(rating) {
+      const buttons = feedbackContainer.querySelectorAll('.vfrc-feedback--button')
+      buttons.forEach((btn, index) => {
+        if (index < rating) {
+          btn.classList.add('hovered')
+        } else {
+          btn.classList.remove('hovered')
+        }
+      })
+    }
+    
+    function clearHoverHighlight() {
+      feedbackContainer
+        .querySelectorAll('.vfrc-feedback--button')
+        .forEach(btn => btn.classList.remove('hovered'))
+    }
+    element.appendChild(feedbackContainer)
+  },
+}
+ 
+export const SliderExtension = {
+  name: 'Slider',
+  type: 'response',
+  match: ({ trace }) =>
+    trace.type === 'slider' || trace.payload?.name === 'slider',
+  render: ({ trace, element }) => {
+    const sliderContainer = document.createElement('div')
+    sliderContainer.innerHTML = `
+          <style>
+            .vfrc-slider {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                padding: 16px;
+                border-radius: 8px;
+                background: white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .vfrc-slider--header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .vfrc-slider--label {
+                font-size: 0.9em;
+                color: #1a1e23;
+                font-family: 'UCity Pro', sans-serif;
+            }
+            .vfrc-slider--value {
+                font-size: 1.1em;
+                font-weight: bold;
+                color: #1a1e23;
+                font-family: 'UCity Pro', sans-serif;
+                min-width: 40px;
+                text-align: center;
+                background: #f0f0f0;
+                padding: 4px 8px;
+                border-radius: 4px;
+            }
+            .vfrc-slider--track {
+                position: relative;
+                height: 6px;
+                background: #e0e0e0;
+                border-radius: 3px;
+                margin: 10px 0;
+            }
+            .vfrc-slider--input {
+                position: absolute;
+                top: -6px;
+                left: 0;
+                width: 100%;
+                height: 18px;
+                background: transparent;
+                outline: none;
+                -webkit-appearance: none;
+                cursor: pointer;
+            }
+            .vfrc-slider--input::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 20px;
+                height: 20px;
+                background: #007bff;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            .vfrc-slider--input::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                background: #007bff;
+                border-radius: 50%;
+                cursor: pointer;
+                border: none;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            .vfrc-slider--fill {
+                height: 100%;
+                background: #007bff;
+                border-radius: 3px;
+                transition: width 0.1s ease;
+            }
+            .vfrc-slider--buttons {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+            }
+            .vfrc-slider--button {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 4px;
+                font-size: 0.9em;
+                font-family: 'UCity Pro', sans-serif;
+                cursor: pointer;
+                transition: opacity 0.2s ease;
+            }
+            .vfrc-slider--button:hover {
+                opacity: 0.8;
+            }
+            .vfrc-slider--button.cancel {
+                background: #f5f5f5;
+                color: #666;
+                border: 1px solid #ddd;
+            }
+            .vfrc-slider--button.submit {
+                background: #007bff;
+                color: white;
+            }
+            .vfrc-slider--button.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+          </style>
+          <div class="vfrc-slider">
+            <div class="vfrc-slider--header">
+              <div class="vfrc-slider--label">Select a value:</div>
+              <div class="vfrc-slider--value">50</div>
+            </div>
+            <div class="vfrc-slider--track">
+              <div class="vfrc-slider--fill"></div>
+              <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value="50" 
+                class="vfrc-slider--input"
+              >
+            </div>
+            <div class="vfrc-slider--buttons">
+              <button class="vfrc-slider--button cancel">Cancel</button>
+              <button class="vfrc-slider--button submit">Submit</button>
+            </div>
+          </div>
+        `
+    
+    const slider = sliderContainer.querySelector('.vfrc-slider--input')
+    const valueDisplay = sliderContainer.querySelector('.vfrc-slider--value')
+    const fillBar = sliderContainer.querySelector('.vfrc-slider--fill')
+    const submitButton = sliderContainer.querySelector('.vfrc-slider--button.submit')
+    const cancelButton = sliderContainer.querySelector('.vfrc-slider--button.cancel')
+    
+    let currentValue = 50
+    
+    // Update fill bar width based on slider value
+    function updateFillBar(value) {
+      const percentage = ((value - slider.min) / (slider.max - slider.min)) * 100
+      fillBar.style.width = percentage + '%'
+    }
+    
+    // Initialize fill bar
+    updateFillBar(currentValue)
+    
+    // Handle slider input
+    slider.addEventListener('input', function(event) {
+      currentValue = parseInt(event.target.value)
+      valueDisplay.textContent = currentValue
+      updateFillBar(currentValue)
+    })
+    
+    // Handle submit button
+    submitButton.addEventListener('click', function(event) {
+      window.voiceflow.chat.interact({
+        type: 'complete',
+        payload: { value: currentValue },
+      })
+      
+      // Disable buttons after submission
+      submitButton.classList.add('disabled')
+      cancelButton.classList.add('disabled')
+      slider.disabled = true
+    })
+    
+    // Handle cancel button
+    cancelButton.addEventListener('click', function(event) {
+      window.voiceflow.chat.interact({
+        type: 'complete',
+        payload: { cancelled: true },
+      })
+      
+      // Disable buttons after cancellation
+      submitButton.classList.add('disabled')
+      cancelButton.classList.add('disabled')
+      slider.disabled = true
+    })
+    
+    element.appendChild(sliderContainer)
+  },
+}
+
+export const NotificationExtension = {
+  name: 'NotificationExtension',
+  type: 'effect',
+  match: ({ trace }) =>
+    trace.type === 'ext_notification' ||
+    trace.payload?.name === 'ext_notification',
+  effect: async ({ trace, element }) => {
+    try {
+      // Get delay from trace payload or default to 5000 (5s)
+      const delay = trace.payload?.delay * 1000 || 5000
+      const animDelay = trace.payload?.anim_delay || 5 // Default to 5 seconds if not specified
+      const message = trace.payload?.message || 'Your custom message here'
+
+      // Wait for the specified delay
+      setTimeout(() => {
+        // Get the chat container element
+        const chatDiv = document.getElementById('voiceflow-chat')
+        if (!chatDiv) {
+          console.error('Chat div not found')
+          return
+        }
+
+        const shadowRoot = chatDiv.shadowRoot
+        if (!shadowRoot) {
+          console.error('Shadow root not found')
+          return
+        }
+
+        // Get the dialog container from shadow DOM
+        const chatContainer = shadowRoot.querySelector(
+          '[class*="vfrc-chat--dialog"]'
+        )
+        if (!chatContainer) {
+          console.error('Chat container not found')
+          return
+        }
+
+        // Create notification container
+        const notificationContainer = document.createElement('div')
+        notificationContainer.className = 'notification-container'
+        notificationContainer.style.cssText = `
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          display: flex;
+          justify-content: center;
+          padding: 10px;
+          z-index: 1000;
+          opacity: 0;
+          transition: opacity 0.5s ease-in-out;
+        `
+
+        // Create notification message
+        const notificationMessage = document.createElement('div')
+        notificationMessage.className = 'notification-message'
+        notificationMessage.style.cssText = `
+          background-color: rgb(255, 255, 255);
+          color: #000;
+          padding: 8px 16px;
+          border-radius: 30px;
+          font-size: 0.8em;
+          text-align: center;
+          max-width: 80%;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          border: 1.5px solid #0058ff;
+        `
+        notificationMessage.textContent = message
+
+        // Assemble notification
+        notificationContainer.appendChild(notificationMessage)
+        chatContainer.appendChild(notificationContainer)
+
+        // Fade in
+        requestAnimationFrame(() => {
+          notificationContainer.style.opacity = '1'
+        })
+
+        // After animDelay seconds, fade out and remove
+        setTimeout(() => {
+          notificationContainer.style.opacity = '0'
+          // Remove the element after fade out completes
+          setTimeout(() => {
+            notificationContainer.remove()
+          }, 500) // Match the transition duration
+        }, animDelay * 1000) // Convert seconds to milliseconds
+
+        console.log('Notification displayed successfully!')
+      }, delay)
+
+    } catch (error) {
+      console.error('Error in NotificationExtension:', error)
+    }
+  },
+}
   },
 }
