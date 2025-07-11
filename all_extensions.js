@@ -1045,5 +1045,3 @@ export const NotificationExtension = {
     }
   },
 }
-  },
-}
