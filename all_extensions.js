@@ -628,6 +628,8 @@ export const FeedbackExtension = {
       })
 
     element.appendChild(feedbackContainer)
+  },
+}
 
 export const StarFeedbackExtension = {
   name: 'Feedback',
