@@ -1,4 +1,4 @@
-const SliderExtension = {
+export const SliderExtension = {
   name: 'Slider',
   type: 'response',
   match: ({ trace }) =>
