@@ -1,4 +1,4 @@
-const NotificationExtension = {
+export const NotificationExtension = {
   name: 'NotificationExtension',
   type: 'effect',
   match: ({ trace }) =>
