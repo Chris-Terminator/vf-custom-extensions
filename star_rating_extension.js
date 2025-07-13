@@ -1,4 +1,4 @@
-const StarFeedbackExtension = {
+export const StarFeedbackExtension = {
   name: 'Feedback',
   type: 'response',
   match: ({ trace }) =>
