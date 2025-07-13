@@ -1,5 +1,5 @@
 # vf-custom-extensions
-Custom Made VF Extensions
+Library of Extensions From VF and a Few Custom Extensions Made Using Claude.ai
 
 Feel free to use any of these extensions in your Voiceflow project!
 
